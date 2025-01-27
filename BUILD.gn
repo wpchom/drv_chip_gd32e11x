@@ -1,0 +1,35 @@
+declare_args() {
+  drv_chip_without_interrupt = false
+}
+
+pkggroup("mds_device") {
+}
+
+pkggroup("gd32e11x_firmware") {
+}
+
+config("drv_chip_gd32e11x_config") {
+  include_dirs = [ "inc/" ]
+}
+
+static_library("drv_chip_gd32e11x") {
+  sources = [
+    "src/drv_flash.c",
+    "src/drv_gpio.c",
+    # "src/drv_i2c.c",
+    "src/startup_gd32e11x.c",
+  ]
+
+  defines = []
+
+  if (defined(drv_chip_without_interrupt) && drv_chip_without_interrupt) {
+    defines += [ "DRV_CHIP_WITHOUT_INTERRUPT=1" ]
+  }
+
+  public_deps = [
+    ":gd32e11x_firmware",
+    ":mds_device",
+  ]
+
+  public_configs = [ ":drv_chip_gd32e11x_config" ]
+}
