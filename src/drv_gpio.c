@@ -6,7 +6,6 @@
  */
 /* Include ----------------------------------------------------------------- */
 #include "drv_gpio.h"
-#include "mds_log.h"
 
 /* Function ---------------------------------------------------------------- */
 static void DRV_GPIO_PinWrite(uintptr_t GPIOx, uint32_t GPIO_Pin, uint32_t val)

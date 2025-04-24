@@ -15,6 +15,14 @@
 extern "C" {
 #endif
 
+#define SET_BIT(REG, BIT)                   ((REG) |= (BIT))
+#define CLEAR_BIT(REG, BIT)                 ((REG) &= ~(BIT))
+#define READ_BIT(REG, BIT)                  ((REG) & (BIT))
+#define CLEAR_REG(REG)                      ((REG) = (0x0))
+#define WRITE_REG(REG, VAL)                 ((REG) = (VAL))
+#define READ_REG(REG)                       ((REG))
+#define MODIFY_REG(REG, CLEARMASK, SETMASK) WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
+
 /* Function ---------------------------------------------------------------- */
 static inline MDS_Tick_t DRV_CHIP_GetTick(void)
 {
@@ -33,9 +41,9 @@ static inline MDS_Tick_t DRV_CHIP_GetTick(void)
     return (count);
 }
 
-extern void DRV_CHIP_JumpIntoVectorAddress(uintptr_t vectorAddress);
-extern void DRV_CHIP_JumpIntoDFU(void);
-extern void DRV_CHIP_SystemReset(void);
+void DRV_CHIP_JumpIntoVectorAddress(uintptr_t vectorAddress);
+void DRV_CHIP_JumpIntoDFU(void);
+void DRV_CHIP_SystemReset(void);
 
 #ifdef __cplusplus
 }

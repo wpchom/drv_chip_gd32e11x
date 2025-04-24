@@ -7,7 +7,6 @@
 /* Include ----------------------------------------------------------------- */
 #include "drv_flash.h"
 #include "drv_chip.h"
-#include "mds_log.h"
 
 /* Function ---------------------------------------------------------------- */
 static void FLASH_Unlock(void)
@@ -61,6 +60,25 @@ static uint32_t FLASH_GetAlignPadData(const uint8_t *data, size_t len)
     return (val.dat32);
 }
 
+size_t DRV_FLASH_Sector(uintptr_t addr, size_t *align)
+{
+    if (align != NULL) {
+        *align = addr - (addr % DRV_FLASH_PAGE_SIZE);
+    }
+
+    return (DRV_FLASH_PAGE_SIZE);
+}
+
+MDS_Err_t DRV_FLASH_Read(uintptr_t addr, uint8_t *data, size_t len, size_t *read)
+{
+    size_t size = MDS_MemBuffCopy(data, len, (uint8_t *)addr, len);
+    if (read != NULL) {
+        *read = size;
+    }
+
+    return ((size == len) ? (MDS_EOK) : (MDS_EIO));
+}
+
 MDS_Err_t DRV_FLASH_Program(uintptr_t addr, const uint8_t *data, size_t len, size_t *write)
 {
     MDS_Err_t err;
@@ -89,29 +107,39 @@ MDS_Err_t DRV_FLASH_Program(uintptr_t addr, const uint8_t *data, size_t len, siz
     return (err);
 }
 
-MDS_Err_t DRV_FLASH_Erase(uintptr_t addr, size_t blks, size_t *erase)
+MDS_Err_t DRV_FLASH_Erase(uintptr_t addr, size_t size, size_t *erase)
 {
-    MDS_Err_t err;
-    size_t cnt = 0;
+    size_t ofs = addr;
+    MDS_Err_t err = FLASH_WaitForLastOperation(FMC_TIMEOUT_COUNT);
 
     FLASH_Unlock();
-    for (err = FLASH_WaitForLastOperation(FMC_TIMEOUT_COUNT); (err == MDS_EOK) && (cnt < blks); cnt++) {
+    while (err == MDS_EOK) {
+        uintptr_t align = 0;
+        uintptr_t sector = DRV_FLASH_Sector(ofs, &align);
+        if ((align != ofs) || (sector > size)) {
+            break;
+        }
+
         FMC_STAT = FMC_FLAG_END | FMC_FLAG_WPERR | FMC_FLAG_PGAERR | FMC_FLAG_PGERR;
 
         FMC_CTL |= FMC_CTL_PER;
-        FMC_ADDR = addr + (DRV_FLASH_PAGE_SIZE * cnt);
+        FMC_ADDR = align;
         FMC_CTL |= FMC_CTL_START;
         __DSB();
         __ISB();
 
         err = FLASH_WaitForLastOperation(FMC_TIMEOUT_COUNT);
+        if (err == MDS_EOK) {
+            ofs += sector;
+            size -= sector;
+        }
 
         FMC_CTL &= ~FMC_CTL_PER;
     }
     FLASH_Lock();
 
     if (erase != NULL) {
-        *erase = cnt;
+        *erase = (ofs - addr);
     }
 
     return (err);
@@ -137,41 +165,32 @@ static MDS_Err_t DDRV_FLASH_Control(const DEV_STORAGE_Adaptr_t *storage, MDS_Ite
     return (MDS_EACCES);
 }
 
-static size_t DDRV_FLASH_BlockSize(const DEV_STORAGE_Adaptr_t *storage, size_t block)
-{
-    UNUSED(storage);
-    UNUSED(block);
-
-    return (DRV_FLASH_PAGE_SIZE);
-}
-
 static MDS_Err_t DDRV_FLASH_Read(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, uint8_t *buff, size_t len,
                                  size_t *read)
 {
-    size_t cnt = MDS_MemBuffCopy(buff, len, (uint8_t *)(periph->object.baseAddr + ofs), len);
-
-    if (read != NULL) {
-        *read = cnt;
-    }
-
-    return (MDS_EOK);
+    return (DRV_FLASH_Read(periph->object.baseAddr + ofs, buff, len, read));
 }
 
-static MDS_Err_t DDRV_FLASH_Program(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, const uint8_t *buff, size_t len,
-                                    size_t *write)
+static MDS_Err_t DDRV_FLASH_Write(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, const uint8_t *buff, size_t len,
+                                  size_t *write)
 {
     return (DRV_FLASH_Program(periph->object.baseAddr + ofs, buff, len, write));
 }
 
-static MDS_Err_t DDRV_FLASH_Erase(const DEV_STORAGE_Periph_t *periph, size_t blk, size_t nums, size_t *erase)
+static MDS_Err_t DDRV_FLASH_Erase(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, size_t size, size_t *erase)
 {
-    return (DRV_FLASH_Erase(periph->object.baseAddr + blk, nums, erase));
+    return (DRV_FLASH_Erase(periph->object.baseAddr + ofs, size, erase));
+}
+
+static size_t DDRV_FLASH_Sector(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, size_t *align)
+{
+    return (DRV_FLASH_Sector(periph->object.baseAddr + ofs, align));
 }
 
 const DEV_STORAGE_Driver_t G_DRV_GD32E11X_FLASH = {
     .control = DDRV_FLASH_Control,
-    .blksize = DDRV_FLASH_BlockSize,
     .read = DDRV_FLASH_Read,
-    .prog = DDRV_FLASH_Program,
+    .write = DDRV_FLASH_Write,
     .erase = DDRV_FLASH_Erase,
+    .sector = DDRV_FLASH_Sector,
 };

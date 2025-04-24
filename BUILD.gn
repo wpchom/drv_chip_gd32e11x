@@ -16,6 +16,10 @@ static_library("drv_chip_gd32e11x") {
   sources = [
     "src/drv_flash.c",
     "src/drv_gpio.c",
+    "src/drv_pmu.c",
+    "src/drv_rcu.c",
+    "src/drv_rtc.c",
+
     # "src/drv_i2c.c",
     "src/startup_gd32e11x.c",
   ]
