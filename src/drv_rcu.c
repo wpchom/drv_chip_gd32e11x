@@ -110,13 +110,13 @@ MDS_Err_t DRV_RCU_HXTALConfig(uint32_t HXTALState)
         if (HXTALState != RCU_HXTAL_OFF) {
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_HXTALSTB) == 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > HXTAL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         } else {
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_HXTALSTB) != 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > HXTAL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         }
@@ -140,7 +140,7 @@ MDS_Err_t DRV_RCU_IRC8MConfig(uint32_t IRC8MState, uint32_t IRC8MCalibValue)
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_IRC8MSTB) == 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > IRC8M_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         } else {
@@ -148,7 +148,7 @@ MDS_Err_t DRV_RCU_IRC8MConfig(uint32_t IRC8MState, uint32_t IRC8MCalibValue)
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_IRC8MSTB) != 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > IRC8M_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         }
@@ -168,7 +168,7 @@ MDS_Err_t DRV_RCU_IRC40KConfig(uint32_t IRC40KState)
 
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_RSTSCK & RCU_RSTSCK_IRC40KSTB) == 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > IRC40K_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
 
@@ -179,7 +179,7 @@ MDS_Err_t DRV_RCU_IRC40KConfig(uint32_t IRC40KState)
 
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_RSTSCK & RCU_RSTSCK_IRC40KSTB) != 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > IRC40K_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     }
@@ -203,7 +203,7 @@ MDS_Err_t DRV_RCU_LXTALConfig(uint32_t LXTALState)
 
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (PMU_CTL & PMU_CTL_BKPWEN) == 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > DBP_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     }
@@ -213,13 +213,13 @@ MDS_Err_t DRV_RCU_LXTALConfig(uint32_t LXTALState)
     if (LXTALState != RCU_LXTAL_OFF) {
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_BDCTL & RCU_BDCTL_LXTALSTB) == 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > LXTAL_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     } else {
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_BDCTL & RCU_BDCTL_LXTALSTB) != 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > LXTAL_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     }
@@ -244,14 +244,14 @@ MDS_Err_t DRV_RCU_IRC48MConfig(uint32_t IRC48MState)
         if (IRC48MState != RCU_IRC48M_OFF) {
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_ADDCTL & RCU_ADDCTL_IRC48MSTB) == 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > IRC48M_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         } else {
             RCU_ADDCTL &= ~RCU_ADDCTL_IRC48MEN;
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_ADDCTL & RCU_ADDCTL_IRC48MSTB) != 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > IRC48M_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         }
@@ -278,7 +278,7 @@ MDS_Err_t DRV_RCU_PLLConfig(DRV_RCU_PLLInit_t *pllInitStruct)
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLLSTB) != 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
 
@@ -297,7 +297,7 @@ MDS_Err_t DRV_RCU_PLLConfig(DRV_RCU_PLLInit_t *pllInitStruct)
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLLSTB) == 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         } else {
@@ -305,7 +305,7 @@ MDS_Err_t DRV_RCU_PLLConfig(DRV_RCU_PLLInit_t *pllInitStruct)
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLLSTB) != 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         }
@@ -349,7 +349,7 @@ MDS_Err_t DRV_RCU_PLL1Config(DRV_RCU_PLL1Init_t *pll1InitStruct, uint32_t predv1
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLL1STB) != 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
 
@@ -359,7 +359,7 @@ MDS_Err_t DRV_RCU_PLL1Config(DRV_RCU_PLL1Init_t *pll1InitStruct, uint32_t predv1
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLL1STB) == 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         } else {
@@ -368,7 +368,7 @@ MDS_Err_t DRV_RCU_PLL1Config(DRV_RCU_PLL1Init_t *pll1InitStruct, uint32_t predv1
 
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLL1STB) != 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         }
@@ -398,7 +398,7 @@ MDS_Err_t DRV_RCU_PLL2Config(DRV_RCU_PLL2Init_t *pll2InitStruct, uint32_t predv1
 
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLL2STB) != 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
 
@@ -409,7 +409,7 @@ MDS_Err_t DRV_RCU_PLL2Config(DRV_RCU_PLL2Init_t *pll2InitStruct, uint32_t predv1
 
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLL2STB) == 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     } else {
@@ -421,7 +421,7 @@ MDS_Err_t DRV_RCU_PLL2Config(DRV_RCU_PLL2Init_t *pll2InitStruct, uint32_t predv1
 
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_PLL2STB) != 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     }
@@ -521,7 +521,7 @@ MDS_Err_t DRV_RCU_ClockConfig(DRV_RCU_ClockInit_t *clkInitStruct)
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick();
              DRV_RCU_GetSysClkSource() != (clkInitStruct->SYSCLKSource << 0x2U);) {
             if ((DRV_CHIP_GetTick() - tickstart) > CLOCKSWITCH_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     }
@@ -540,7 +540,7 @@ MDS_Err_t DRV_RCU_ClockConfig(DRV_RCU_ClockInit_t *clkInitStruct)
 
     SystemCoreClock = DRV_RCU_GetSysClockFreq();
 
-    if (SysTick_Config(SystemCoreClock / MDS_CLOCK_TICK_FREQ_HZ) != 0) {
+    if (SysTick_Config(SystemCoreClock / CONFIG_MDS_CLOCK_TICK_FREQ_HZ) != 0) {
         return (MDS_EIO);
     }
 
@@ -653,13 +653,13 @@ MDS_Err_t DRV_RCU_DeInit(void)
 
     for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); DRV_RCU_GetSysClkSource() != 0x00U;) {
         if ((DRV_CHIP_GetTick() - tickstart) > CLOCKSWITCH_TIMEOUT_VALUE) {
-            return (MDS_ETIME);
+            return (MDS_ETIMEOUT);
         }
     }
 
     SystemCoreClock = IRC8M_VALUE;
 
-    if (SysTick_Config(SystemCoreClock / MDS_CLOCK_TICK_FREQ_HZ) != 0) {
+    if (SysTick_Config(SystemCoreClock / CONFIG_MDS_CLOCK_TICK_FREQ_HZ) != 0) {
         return (MDS_EIO);
     }
 
@@ -668,7 +668,7 @@ MDS_Err_t DRV_RCU_DeInit(void)
     for (MDS_Tick_t tickstart = DRV_CHIP_GetTick();
          (RCU_CTL & (RCU_CTL_PLLSTB | RCU_CTL_PLL1STB | RCU_CTL_PLL2STB)) != 0U;) {
         if ((DRV_CHIP_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
-            return (MDS_ETIME);
+            return (MDS_ETIMEOUT);
         }
     }
 
@@ -676,7 +676,7 @@ MDS_Err_t DRV_RCU_DeInit(void)
 
     for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_CTL & RCU_CTL_HXTALSTB) != 0U;) {
         if ((DRV_CHIP_GetTick() - tickstart) > HXTAL_TIMEOUT_VALUE) {
-            return (MDS_ETIME);
+            return (MDS_ETIMEOUT);
         }
     }
 
@@ -701,7 +701,7 @@ MDS_Err_t DRV_RCU_RTCClockSelection(uint32_t rtcClkSource)
 
         for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (PMU_CTL & PMU_CTL_BKPWEN) == 0U;) {
             if ((DRV_CHIP_GetTick() - tickstart) > DBP_TIMEOUT_VALUE) {
-                return (MDS_ETIME);
+                return (MDS_ETIMEOUT);
             }
         }
     }
@@ -718,7 +718,7 @@ MDS_Err_t DRV_RCU_RTCClockSelection(uint32_t rtcClkSource)
         if ((tmpReg & RCU_BDCTL_LXTALEN) != 0U) {
             for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RCU_BDCTL & RCU_BDCTL_LXTALSTB) == 0U;) {
                 if ((DRV_CHIP_GetTick() - tickstart) > LXTAL_TIMEOUT_VALUE) {
-                    return (MDS_ETIME);
+                    return (MDS_ETIMEOUT);
                 }
             }
         }

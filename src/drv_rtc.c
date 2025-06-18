@@ -30,7 +30,7 @@ static MDS_Err_t RTC_WaitForSync(RTC_TypeDef *RTCx)
     RTCx->CTL &= ~RTC_CTL_RSYNF;
     for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RTCx->CTL & RTC_CTL_RSYNF) == 0U;) {
         if ((DRV_CHIP_GetTick() - tickstart) > RTC_TIMEOUT_VALUE) {
-            return (MDS_ETIME);
+            return (MDS_ETIMEOUT);
         }
     }
 
@@ -41,7 +41,7 @@ static MDS_Err_t RTC_WaitLastOperation(RTC_TypeDef *RTCx)
 {
     for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RTCx->CTL & RTC_CTL_LWOFF) == 0U;) {
         if ((DRV_CHIP_GetTick() - tickstart) > RTC_TIMEOUT_VALUE) {
-            return (MDS_ETIME);
+            return (MDS_ETIMEOUT);
         }
     }
 

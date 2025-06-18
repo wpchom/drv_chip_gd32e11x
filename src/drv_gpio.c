@@ -30,7 +30,8 @@ MDS_Err_t DRV_GPIO_ExtiConfig(uintptr_t GPIOx, uint32_t GPIO_Pin, DEV_GPIO_Inter
         }
 
         // AFIO_EXTISSx
-        volatile uint32_t *AFIO_EXTISS = (volatile uint32_t *)(AFIO + 0x08U + sizeof(uintptr_t) * (pinIndex >> 0x02U));
+        volatile uint32_t *AFIO_EXTISS =
+            (volatile uint32_t *)(AFIO + 0x08U + sizeof(uintptr_t) * (pinIndex >> 0x02U));
         uint32_t regIndex = (*AFIO_EXTISS >> (0x04U * (pinIndex & 0x03U))) & 0x0FU;
         if ((intr == DEV_GPIO_INTR_NONE) && (regIndex != portIndex)) {
             continue;
@@ -97,7 +98,9 @@ MDS_Err_t DRV_GPIO_PinConfig(uintptr_t GPIOx, uint32_t GPIO_Pin, const DEV_GPIO_
             GPIO_CTL1(GPIOx) = regCtl1 | (mode << (4U * (pinIndex - 0x08U)));
         }
         if (config->mode == DEV_GPIO_MODE_INPUT) {
-            GPIO_BOP(GPIOx) = 1UL << (pinIndex + ((config->type == DEV_GPIO_TYPE_PP_DOWN) ? (0x08U) : (0x00U)));
+            GPIO_BOP(GPIOx) = 1UL
+                              << (pinIndex +
+                                  ((config->type == DEV_GPIO_TYPE_PP_DOWN) ? (0x08U) : (0x00U)));
         }
     }
 
@@ -131,12 +134,12 @@ void DRV_GPIO_PinLow(uintptr_t GPIOx, uint32_t GPIO_Pin)
 
 void DRV_GPIO_PinToggle(uintptr_t GPIOx, uint32_t GPIO_Pin)
 {
-    MDS_Item_t lock = MDS_CoreInterruptLock();
+    MDS_Lock_t lock = MDS_CriticalLock(NULL);
     uint32_t output = DRV_GPIO_PortReadOutput(GPIOx);
     uint32_t clr = output & GPIO_Pin;
     uint32_t set = (~output) & GPIO_Pin;
     GPIO_BOP(GPIOx) = (clr << 0x10U) | set;
-    MDS_CoreInterruptRestore(lock);
+    MDS_CriticalRestore(NULL, lock);
 }
 
 void DRV_GPIO_PinIRQHandler(DEV_GPIO_Object_t *object)
@@ -152,7 +155,8 @@ void DRV_GPIO_PinIRQHandler(DEV_GPIO_Object_t *object)
 }
 
 /* Driver ------------------------------------------------------------------ */
-static MDS_Err_t DDRV_GPIO_PortControl(const DEV_GPIO_Module_t *gpio, MDS_Item_t cmd, MDS_Arg_t *arg)
+static MDS_Err_t DDRV_GPIO_PortControl(const DEV_GPIO_Module_t *gpio, MDS_Item_t cmd,
+                                       MDS_Arg_t *arg)
 {
     MDS_ASSERT(gpio != NULL);
 

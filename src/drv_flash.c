@@ -146,7 +146,8 @@ MDS_Err_t DRV_FLASH_Erase(uintptr_t addr, size_t size, size_t *erase)
 }
 
 /* Driver ------------------------------------------------------------------ */
-static MDS_Err_t DDRV_FLASH_Control(const DEV_STORAGE_Adaptr_t *storage, MDS_Item_t cmd, MDS_Arg_t *arg)
+static MDS_Err_t DDRV_FLASH_Control(const DEV_STORAGE_Adaptr_t *storage, MDS_Item_t cmd,
+                                    MDS_Arg_t *arg)
 {
     MDS_ASSERT(storage != NULL);
 
@@ -165,19 +166,20 @@ static MDS_Err_t DDRV_FLASH_Control(const DEV_STORAGE_Adaptr_t *storage, MDS_Ite
     return (MDS_EACCES);
 }
 
-static MDS_Err_t DDRV_FLASH_Read(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, uint8_t *buff, size_t len,
-                                 size_t *read)
+static MDS_Err_t DDRV_FLASH_Read(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, uint8_t *buff,
+                                 size_t len, size_t *read)
 {
     return (DRV_FLASH_Read(periph->object.baseAddr + ofs, buff, len, read));
 }
 
-static MDS_Err_t DDRV_FLASH_Write(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, const uint8_t *buff, size_t len,
-                                  size_t *write)
+static MDS_Err_t DDRV_FLASH_Write(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs,
+                                  const uint8_t *buff, size_t len, size_t *write)
 {
     return (DRV_FLASH_Program(periph->object.baseAddr + ofs, buff, len, write));
 }
 
-static MDS_Err_t DDRV_FLASH_Erase(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, size_t size, size_t *erase)
+static MDS_Err_t DDRV_FLASH_Erase(const DEV_STORAGE_Periph_t *periph, uintptr_t ofs, size_t size,
+                                  size_t *erase)
 {
     return (DRV_FLASH_Erase(periph->object.baseAddr + ofs, size, erase));
 }

@@ -15,13 +15,14 @@
 extern "C" {
 #endif
 
-#define SET_BIT(REG, BIT)                   ((REG) |= (BIT))
-#define CLEAR_BIT(REG, BIT)                 ((REG) &= ~(BIT))
-#define READ_BIT(REG, BIT)                  ((REG) & (BIT))
-#define CLEAR_REG(REG)                      ((REG) = (0x0))
-#define WRITE_REG(REG, VAL)                 ((REG) = (VAL))
-#define READ_REG(REG)                       ((REG))
-#define MODIFY_REG(REG, CLEARMASK, SETMASK) WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
+#define SET_BIT(REG, BIT)   ((REG) |= (BIT))
+#define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
+#define READ_BIT(REG, BIT)  ((REG) & (BIT))
+#define CLEAR_REG(REG)      ((REG) = (0x0))
+#define WRITE_REG(REG, VAL) ((REG) = (VAL))
+#define READ_REG(REG)       ((REG))
+#define MODIFY_REG(REG, CLEARMASK, SETMASK)                                                       \
+    WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
 
 /* Function ---------------------------------------------------------------- */
 static inline MDS_Tick_t DRV_CHIP_GetTick(void)
@@ -29,13 +30,13 @@ static inline MDS_Tick_t DRV_CHIP_GetTick(void)
     uint32_t count = 0;
 
     if ((DCB->DEMCR & DCB_DEMCR_TRCENA_Msk) == 0U) {
-        MDS_Item_t lock = MDS_CoreInterruptLock();
+        MDS_Lock_t lock = MDS_CriticalLock(NULL);
         DCB->DEMCR |= DCB_DEMCR_TRCENA_Msk;
         DWT->CYCCNT = 0;
         DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-        MDS_CoreInterruptRestore(lock);
+        MDS_CriticalRestore(NULL, lock);
     } else {
-        count = DWT->CYCCNT / (SystemCoreClock / MDS_CLOCK_TICK_FREQ_HZ);
+        count = DWT->CYCCNT / (SystemCoreClock / CONFIG_MDS_CLOCK_TICK_FREQ_HZ);
     }
 
     return (count);
