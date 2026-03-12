@@ -66,24 +66,24 @@ MDS_Err_t DRV_GPIO_PinConfig(uintptr_t GPIOx, uint32_t GPIO_Pin, const DEV_GPIO_
 
     if (config->mode == DEV_GPIO_MODE_INPUT) {
         if ((config->type == DEV_GPIO_TYPE_OD) || (config->type == DEV_GPIO_TYPE_PP_NO)) {
-            mode = 0x04;  // 0100
+            mode = 0x04; // 0100
         } else {
-            mode = 0x08;  // 1000
+            mode = 0x08; // 1000
         }
     } else if (config->mode == DEV_GPIO_MODE_OUTPUT) {
         if (config->type == DEV_GPIO_TYPE_OD) {
-            mode = 0x05;  // 0101
+            mode = 0x05; // 0101
         } else {
-            mode = 0x01;  // 0001
+            mode = 0x01; // 0001
         }
     } else if (config->mode == DEV_GPIO_MODE_ALTERNATE) {
         if (config->type == DEV_GPIO_TYPE_OD) {
-            mode = 0x0F;  // 1111
+            mode = 0x0F; // 1111
         } else {
-            mode = 0x0B;  // 1011
+            mode = 0x0B; // 1011
         }
-    } else {          // DEV_GPIO_MODE_ANALOG
-        mode = 0x00;  // 0000
+    } else {         // DEV_GPIO_MODE_ANALOG
+        mode = 0x00; // 0000
     }
 
     for (uint32_t pinIndex = 0; (1UL << pinIndex) < (GPIO_Pin & 0x0000FFFFU); pinIndex += 1) {
@@ -98,9 +98,8 @@ MDS_Err_t DRV_GPIO_PinConfig(uintptr_t GPIOx, uint32_t GPIO_Pin, const DEV_GPIO_
             GPIO_CTL1(GPIOx) = regCtl1 | (mode << (4U * (pinIndex - 0x08U)));
         }
         if (config->mode == DEV_GPIO_MODE_INPUT) {
-            GPIO_BOP(GPIOx) = 1UL
-                              << (pinIndex +
-                                  ((config->type == DEV_GPIO_TYPE_PP_DOWN) ? (0x08U) : (0x00U)));
+            GPIO_BOP(GPIOx) =
+                1UL << (pinIndex + ((config->type == DEV_GPIO_TYPE_PP_DOWN) ? (0x08U) : (0x00U)));
         }
     }
 
@@ -144,8 +143,8 @@ void DRV_GPIO_PinToggle(uintptr_t GPIOx, uint32_t GPIO_Pin)
 
 void DRV_GPIO_PinIRQHandler(DEV_GPIO_Object_t *object)
 {
-    if ((EXTI_PD & object->pinMask) != 0x00U) {
-        EXTI_PD = object->pinMask;
+    if ((EXTI_PD & object->pinMask.mask) != 0x00U) {
+        EXTI_PD = object->pinMask.mask;
 
         DEV_GPIO_Pin_t *pin = (DEV_GPIO_Pin_t *)(object->parent);
         if ((pin != NULL) && (pin->callback != NULL)) {
@@ -155,8 +154,8 @@ void DRV_GPIO_PinIRQHandler(DEV_GPIO_Object_t *object)
 }
 
 /* Driver ------------------------------------------------------------------ */
-static MDS_Err_t DDRV_GPIO_PortControl(const DEV_GPIO_Module_t *gpio, MDS_Item_t cmd,
-                                       MDS_Arg_t *arg)
+static MDS_Err_t DDRV_GPIO_PortControl(const DEV_GPIO_Module_t *gpio, MDS_DevCmd_t cmd,
+                                       MDS_Arg_t arg)
 {
     MDS_ASSERT(gpio != NULL);
 
@@ -168,8 +167,8 @@ static MDS_Err_t DDRV_GPIO_PortControl(const DEV_GPIO_Module_t *gpio, MDS_Item_t
     }
 
     if (cmd == DEV_GPIO_CMD_PIN_TOGGLE) {
-        DEV_GPIO_Pin_t *pin = (DEV_GPIO_Pin_t *)arg;
-        DRV_GPIO_PinToggle((uintptr_t)(pin->object.GPIOx), pin->object.pinMask);
+        DEV_GPIO_Pin_t *pin = (DEV_GPIO_Pin_t *)(arg.ptr);
+        DRV_GPIO_PinToggle((uintptr_t)(pin->object.GPIOx), pin->object.pinMask.mask);
         return (MDS_EOK);
     }
 
@@ -181,26 +180,27 @@ static MDS_Err_t DDRV_GPIO_PinConfig(const DEV_GPIO_Pin_t *pin, const DEV_GPIO_C
     uintptr_t GPIOx = (uintptr_t)(pin->object.GPIOx);
 
     if (config->mode == DEV_GPIO_MODE_OUTPUT) {
-        DRV_GPIO_PinWrite(GPIOx, pin->object.pinMask, pin->object.initVal);
+        DRV_GPIO_PinWrite(GPIOx, pin->object.pinMask.mask, pin->object.initVal.mask);
     }
 
-    return (DRV_GPIO_PinConfig(GPIOx, pin->object.pinMask, config));
+    return (DRV_GPIO_PinConfig(GPIOx, pin->object.pinMask.mask, config));
 }
 
 static MDS_Mask_t DDRV_GPIO_PinRead(const DEV_GPIO_Pin_t *pin, bool input)
 {
     uintptr_t GPIOx = (uintptr_t)(pin->object.GPIOx);
 
-    MDS_Mask_t read = (input) ? (DRV_GPIO_PortReadInput(GPIOx)) : (DRV_GPIO_PortReadOutput(GPIOx));
+    uint32_t read = (input) ? (DRV_GPIO_PortReadInput(GPIOx)) : (DRV_GPIO_PortReadOutput(GPIOx));
 
-    return ((read & pin->object.pinMask) >> __CLZ(__RBIT(pin->object.pinMask)));
+    return ((MDS_Mask_t) {(read & pin->object.pinMask.mask) >>
+                          __CLZ(__RBIT(pin->object.pinMask.mask))});
 }
 
 static void DDRV_GPIO_PinWrite(const DEV_GPIO_Pin_t *pin, MDS_Mask_t val)
 {
     uintptr_t GPIOx = (uintptr_t)(pin->object.GPIOx);
 
-    DRV_GPIO_PinWrite(GPIOx, pin->object.pinMask, val);
+    DRV_GPIO_PinWrite(GPIOx, pin->object.pinMask.mask, val.mask);
 }
 
 const DEV_GPIO_Driver_t G_DRV_GD32E11X_GPIO = {

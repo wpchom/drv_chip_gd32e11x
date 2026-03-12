@@ -38,7 +38,7 @@ __attribute__((weak, alias("Default_Handler"))) void SVC_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void DebugMon_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void PendSV_Handler(void);
 __attribute__((weak, alias("Default_Handler"))) void SysTick_Handler(void);
-#ifndef DRV_CHIP_WITHOUT_INTERRUPT
+#ifndef DRV_CHIP_WITHOUT_IRQ
 __attribute__((weak, alias("Default_Handler"))) void WWDGT_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void LVD_IRQHandler(void);
 __attribute__((weak, alias("Default_Handler"))) void TAMPER_IRQHandler(void);
@@ -114,7 +114,7 @@ static void (*__VECTOR_TABLE[])(void) __VECTOR_TABLE_ATTRIBUTE = {
     0,
     PendSV_Handler,
     SysTick_Handler,
-#ifndef DRV_CHIP_WITHOUT_INTERRUPT
+#ifndef DRV_CHIP_WITHOUT_IRQ
     WWDGT_IRQHandler,
     LVD_IRQHandler,
     TAMPER_IRQHandler,
@@ -187,19 +187,6 @@ static void (*__VECTOR_TABLE[])(void) __VECTOR_TABLE_ATTRIBUTE = {
 };
 
 /* Function ---------------------------------------------------------------- */
-__attribute__((weak, naked, noreturn)) void _start(void)
-{
-    __asm volatile("bl     main");
-    __asm volatile("b      .");
-}
-
-__attribute__((weak, naked, noreturn)) void _exit(int res)
-{
-    (void)(res);
-
-    __asm volatile("b      .");
-}
-
 __attribute__((weak)) void VectorInit(uintptr_t vectorAddress)
 {
     SysTick->CTRL = 0U;
@@ -255,4 +242,17 @@ __attribute__((__noreturn__)) void DRV_CHIP_JumpIntoDFU(void)
 __attribute__((__noreturn__)) void DRV_CHIP_SystemReset(void)
 {
     NVIC_SystemReset();
+}
+
+// gcc
+__attribute__((weak, naked, __noreturn__)) void _start(void)
+{
+    __asm volatile("bl     main");
+    __asm volatile("b      .");
+}
+
+__attribute__((naked, __noreturn__)) void _exit(int status)
+{
+    (void)(status);
+    __asm volatile("b      .");
 }

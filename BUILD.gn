@@ -1,15 +1,15 @@
 declare_args() {
-  drv_chip_without_interrupt = false
-}
-
-pkggroup("mds_device") {
+  drv_chip_without_irq = false
 }
 
 pkggroup("gd32e11x_firmware") {
 }
 
-config("drv_chip_gd32e11x_config") {
-  include_dirs = [ "inc/" ]
+pkggroup("mds") {
+}
+
+config("drv_chip_gd32e11x_cfg") {
+  include_dirs = [ "include/" ]
 }
 
 static_library("drv_chip_gd32e11x") {
@@ -19,21 +19,21 @@ static_library("drv_chip_gd32e11x") {
     "src/drv_pmu.c",
     "src/drv_rcu.c",
     "src/drv_rtc.c",
+    "src/startup_gd32e11x.c",
 
     # "src/drv_i2c.c",
-    "src/startup_gd32e11x.c",
   ]
 
   defines = []
 
-  if (defined(drv_chip_without_interrupt) && drv_chip_without_interrupt) {
-    defines += [ "DRV_CHIP_WITHOUT_INTERRUPT=1" ]
+  if (defined(drv_chip_without_irq) && drv_chip_without_irq) {
+    defines += [ "DRV_CHIP_WITHOUT_IRQ=1" ]
   }
 
   public_deps = [
     ":gd32e11x_firmware",
-    ":mds_device",
+    ":mds",
   ]
 
-  public_configs = [ ":drv_chip_gd32e11x_config" ]
+  public_configs = [ ":drv_chip_gd32e11x_cfg" ]
 }

@@ -30,7 +30,7 @@ static MDS_Err_t RTC_WaitForSync(RTC_TypeDef *RTCx)
     RTCx->CTL &= ~RTC_CTL_RSYNF;
     for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RTCx->CTL & RTC_CTL_RSYNF) == 0U;) {
         if ((DRV_CHIP_GetTick() - tickstart) > RTC_TIMEOUT_VALUE) {
-            return (MDS_ETIMEOUT);
+            return (MDS_ETIME);
         }
     }
 
@@ -41,7 +41,7 @@ static MDS_Err_t RTC_WaitLastOperation(RTC_TypeDef *RTCx)
 {
     for (MDS_Tick_t tickstart = DRV_CHIP_GetTick(); (RTCx->CTL & RTC_CTL_LWOFF) == 0U;) {
         if ((DRV_CHIP_GetTick() - tickstart) > RTC_TIMEOUT_VALUE) {
-            return (MDS_ETIMEOUT);
+            return (MDS_ETIME);
         }
     }
 
@@ -57,12 +57,12 @@ MDS_Err_t DRV_RTC_Init(DRV_RTC_Handle_t *hrtc, const DRV_RTC_InitStruct_t *init)
 
     do {
         err = RTC_WaitForSync(RTCx);
-        if (err != MDS_EOK) {
+        if (!MDS_ErrIsSame(err, MDS_EOK)) {
             break;
         }
 
         err = RTC_WaitLastOperation(RTCx);
-        if (err != MDS_EOK) {
+        if (!MDS_ErrIsSame(err, MDS_EOK)) {
             break;
         }
 
@@ -90,7 +90,7 @@ MDS_Err_t DRV_RTC_DeInit(DRV_RTC_Handle_t *hrtc)
 
     do {
         err = RTC_WaitLastOperation(RTCx);
-        if (err != MDS_EOK) {
+        if (!MDS_ErrIsSame(err, MDS_EOK)) {
             break;
         }
         RTCx->CTL |= RTC_CTL_CMF;
@@ -105,7 +105,7 @@ MDS_Err_t DRV_RTC_DeInit(DRV_RTC_Handle_t *hrtc)
 
         RTCx->CTL &= ~RTC_CTL_CMF;
         err = RTC_WaitLastOperation(RTCx);
-        if (err != MDS_EOK) {
+        if (!MDS_ErrIsSame(err, MDS_EOK)) {
             break;
         }
 
@@ -151,7 +151,7 @@ MDS_Err_t DRV_RTC_TimerAlarmStartINT(DRV_RTC_Handle_t *hrtc, uint32_t timer, uin
 
     do {
         err = RTC_WaitLastOperation(RTCx);
-        if (err != MDS_EOK) {
+        if (!MDS_ErrIsSame(err, MDS_EOK)) {
             break;
         }
         RTCx->CTL |= RTC_CTL_CMF;
@@ -164,12 +164,12 @@ MDS_Err_t DRV_RTC_TimerAlarmStartINT(DRV_RTC_Handle_t *hrtc, uint32_t timer, uin
 
         RTCx->CTL &= ~RTC_CTL_CMF;
         err = RTC_WaitLastOperation(RTCx);
-        if (err != MDS_EOK) {
+        if (!MDS_ErrIsSame(err, MDS_EOK)) {
             break;
         }
     } while (0);
 
-    if (err == MDS_EOK) {
+    if (MDS_ErrIsSame(err, MDS_EOK)) {
         EXTI_RTEN |= EXTI_RTEN_RTEN17;
         EXTI_INTEN |= EXTI_INTEN_INTEN17;
         RTCx->INTEN |= RTC_INTEN_ALRMIE;

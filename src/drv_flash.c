@@ -71,12 +71,12 @@ size_t DRV_FLASH_Sector(uintptr_t addr, size_t *align)
 
 MDS_Err_t DRV_FLASH_Read(uintptr_t addr, uint8_t *data, size_t len, size_t *read)
 {
-    size_t size = MDS_MemBuffCopy(data, len, (uint8_t *)addr, len);
+    memcpy(data, (uint8_t *)addr, len);
     if (read != NULL) {
-        *read = size;
+        *read = len;
     }
 
-    return ((size == len) ? (MDS_EOK) : (MDS_EIO));
+    return (MDS_EOK);
 }
 
 MDS_Err_t DRV_FLASH_Program(uintptr_t addr, const uint8_t *data, size_t len, size_t *write)
@@ -85,8 +85,8 @@ MDS_Err_t DRV_FLASH_Program(uintptr_t addr, const uint8_t *data, size_t len, siz
     size_t cnt = 0;
 
     FLASH_Unlock();
-    for (err = FLASH_WaitForLastOperation(FMC_TIMEOUT_COUNT); (err == MDS_EOK) && (cnt < len);
-         cnt += sizeof(uint32_t)) {
+    for (err = FLASH_WaitForLastOperation(FMC_TIMEOUT_COUNT);
+         (MDS_ErrIsSame(err, MDS_EOK)) && (cnt < len); cnt += sizeof(uint32_t)) {
         FMC_STAT = FMC_FLAG_END | FMC_FLAG_WPERR | FMC_FLAG_PGAERR | FMC_FLAG_PGERR;
 
         FMC_CTL |= FMC_CTL_PG;
@@ -113,7 +113,7 @@ MDS_Err_t DRV_FLASH_Erase(uintptr_t addr, size_t size, size_t *erase)
     MDS_Err_t err = FLASH_WaitForLastOperation(FMC_TIMEOUT_COUNT);
 
     FLASH_Unlock();
-    while (err == MDS_EOK) {
+    while (MDS_ErrIsSame(err, MDS_EOK)) {
         uintptr_t align = 0;
         uintptr_t sector = DRV_FLASH_Sector(ofs, &align);
         if ((align != ofs) || (sector > size)) {
@@ -129,7 +129,7 @@ MDS_Err_t DRV_FLASH_Erase(uintptr_t addr, size_t size, size_t *erase)
         __ISB();
 
         err = FLASH_WaitForLastOperation(FMC_TIMEOUT_COUNT);
-        if (err == MDS_EOK) {
+        if (MDS_ErrIsSame(err, MDS_EOK)) {
             ofs += sector;
             size -= sector;
         }
@@ -146,8 +146,8 @@ MDS_Err_t DRV_FLASH_Erase(uintptr_t addr, size_t size, size_t *erase)
 }
 
 /* Driver ------------------------------------------------------------------ */
-static MDS_Err_t DDRV_FLASH_Control(const DEV_STORAGE_Adaptr_t *storage, MDS_Item_t cmd,
-                                    MDS_Arg_t *arg)
+static MDS_Err_t DDRV_FLASH_Control(const DEV_STORAGE_Adaptr_t *storage, MDS_DevCmd_t cmd,
+                                    MDS_Arg_t arg)
 {
     MDS_ASSERT(storage != NULL);
 
